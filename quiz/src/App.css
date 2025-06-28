@@ -171,10 +171,29 @@ body {
 }
 
 .hero-title {
+  background: linear-gradient(270deg, #667eea, #764ba2, #43e97b, #38f9d7, #667eea);
+  background-size: 1000% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
   font-size: 3.5rem;
   font-weight: bold;
   margin-bottom: 1.5rem;
   line-height: 1.2;
+  animation: animated-gradient 6s ease-in-out infinite;
+}
+
+@keyframes animated-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .hero-subtitle {
