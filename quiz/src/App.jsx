@@ -1353,7 +1353,7 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowLogin(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-login ans register               <h2 style={{color: 'white'}}>Login to QuizMaster</h2>
+              <h2 style={{color: 'white'}}>Login to QuizMaster</h2>
               <button 
                 className="close-btn"
                 onClick={() => setShowLogin(false)}
