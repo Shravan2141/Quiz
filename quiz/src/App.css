@@ -8,8 +8,8 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
-  color: #333;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #f3f3f3;
+  background: linear-gradient(135deg, #3a4161 0%, #232946 100%);
   min-height: 100vh;
 }
 
@@ -38,13 +38,46 @@ body {
   align-items: center;
 }
 
-.logo {
-  font-size: 2rem;
+/* Logo styles */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-image {
+  height: 40px;
+  width: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logo-text {
+  font-size: 1.8rem;
   font-weight: bold;
   background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin: 0;
+}
+
+.hero-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.hero-logo-image {
+  height: 120px;
+  width: auto;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.hero-logo-image:hover {
+  transform: scale(1.05);
 }
 
 .nav {
@@ -914,7 +947,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(20, 22, 34, 0.85) !important;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1166,7 +1199,11 @@ body {
     padding: 1rem;
   }
 
-  .logo {
+  .logo-image {
+    height: 32px;
+  }
+
+  .logo-text {
     font-size: 1.5rem;
   }
 
@@ -1309,6 +1346,18 @@ body {
   
   .question-item {
     padding: 1rem;
+  }
+
+  .logo-image {
+    height: 28px;
+  }
+  
+  .logo-text {
+    font-size: 1.3rem;
+  }
+  
+  .hero-logo-image {
+    height: 60px;
   }
 }
 
@@ -2263,5 +2312,95 @@ body {
   
   .student-summary {
     grid-template-columns: 1fr;
+  }
+}
+
+/* --- IMPROVED VISIBILITY AND CONTRAST --- */
+.dashboard, .page-container, .page-content, .category-card, .add-question-form, .quiz-form, .results-summary, .summary-card, .quiz-result-card, .modal {
+  background: rgba(30, 32, 48, 0.92) !important;
+  color: #f3f3f3 !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+}
+
+.dashboard h2, .page-header h2, .category-card h3, .questions-section h3, .summary-card h3, .quiz-result-header h3, .student-results-header h3 {
+  color: #fff !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+label, .form-group label, .add-question-form .form-group label, .options-group label {
+  color: #e0e0e0 !important;
+}
+
+input, textarea, select {
+  background: #232946 !important;
+  color: #f3f3f3 !important;
+  border: 2px solid #667eea !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #a5b4fc !important;
+  background: #232946 !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #b0b3c6 !important;
+  opacity: 1 !important;
+}
+
+button, .login-btn, .logout-btn, .register-btn, .add-quiz-btn, .view-results-btn, .edit-quiz-btn, .delete-quiz-btn, .preview-quiz-btn, .start-quiz-btn, .submit-btn, .cancel-btn {
+  color: #fff !important;
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.18);
+}
+
+button:hover, .login-btn:hover, .register-btn:hover, .add-quiz-btn:hover, .view-results-btn:hover, .edit-quiz-btn:hover, .delete-quiz-btn:hover, .preview-quiz-btn:hover, .start-quiz-btn:hover, .submit-btn:hover, .cancel-btn:hover {
+  background: linear-gradient(135deg, #764ba2, #667eea) !important;
+  filter: brightness(1.1);
+}
+
+/* For cards and overlays */
+.category-card, .summary-card, .quiz-result-card {
+  border: 1px solid #44476a !important;
+}
+
+/* For modal overlays */
+.modal-overlay {
+  background: rgba(20, 22, 34, 0.85) !important;
+}
+
+/* For error and info text */
+.error, .info, .success {
+  color: #ffb4b4 !important;
+  font-weight: bold;
+}
+
+/* For links */
+a, .switch-link {
+  color: #a5b4fc !important;
+  text-decoration: underline;
+}
+
+a:hover, .switch-link:hover {
+  color: #fff !important;
+}
+
+.floating-logo {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: float 3s ease-in-out infinite;
+  object-fit: cover;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
   }
 }

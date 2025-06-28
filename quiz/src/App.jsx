@@ -4,6 +4,7 @@ import { auth, provider, db } from './firebase'
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from 'firebase/firestore'
 import { GoogleAuthProvider } from 'firebase/auth'
+import logo from './assets/logo.png'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -626,7 +627,10 @@ function App() {
     <div className="app">
       <header className="header">
         <div className="header-content">
-          <h1 className="logo">QuizMaster</h1>
+          <div className="logo-container">
+            <img src={logo} alt="QuizMaster Logo" className="logo-image" />
+            <h1 className="logo-text">QuizMaster</h1>
+          </div>
           <nav className="nav">
             {!isLoading && !isLoggedIn ? (
               <div className="auth-buttons">
@@ -645,7 +649,7 @@ function App() {
               </div>
             ) : !isLoading && isLoggedIn ? (
               <div className="user-section">
-                <span className="welcome-text">Welcome back, {userType}!</span>
+                <span className="welcome-text">Welcome back, {user.displayName}!</span>
                 <button 
                   className="logout-btn"
                   onClick={handleLogout}
@@ -681,20 +685,15 @@ function App() {
                 >
                   Get Started
                 </button>
-                <button className="cta-secondary">
+                {/* <button className="cta-secondary">
                   Learn More
-                </button>
+                </button> */}
               </div>
             </div>
             <div className="hero-image">
               <div className="quiz-illustration">
                 <div className="quiz-card">
-                  <div className="question-mark">?</div>
-                  <div className="quiz-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
+                  <img src={logo} alt="QuizMaster Logo" className="floating-logo" />
                 </div>
               </div>
             </div>
@@ -705,7 +704,7 @@ function App() {
             {currentPage === 'dashboard' && (
               <div className="dashboard">
                 <div className="page-header">
-                  <h2>Welcome to QuizMaster, {userType}!</h2>
+                  <h2>Welcome to QuizMaster, {user.displayName}!</h2>
                 </div>
                 
                 {userType === 'teacher' ? (
