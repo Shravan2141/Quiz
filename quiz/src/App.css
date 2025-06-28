@@ -953,26 +953,30 @@ body {
   align-items: center;
   z-index: 1000;
   backdrop-filter: blur(5px);
+  padding: 1rem;
 }
 
 .modal {
   background: white;
-  border-radius: 20px;
-  padding: 1.25rem;
-  max-width: 320px;
-  width: 90%;
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: modalSlideIn 0.3s ease;
+  position: relative;
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-50px);
+    transform: translateY(-30px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -980,51 +984,61 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .modal-header h2 {
   color: #333;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   cursor: pointer;
   color: #666;
-  padding: 0.5rem;
+  padding: 0.25rem;
   border-radius: 50%;
   transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close-btn:hover {
   background: #f0f0f0;
   color: #333;
+  transform: scale(1.1);
 }
 
 /* User type selector */
 .user-type-selector {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .user-type-selector label {
   display: block;
   font-weight: 600;
   color: #333;
-  margin-bottom: 0.4rem;
-  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
 }
 
 .user-type-buttons {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
 .user-type-btn {
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.6rem 0.75rem;
   border: 2px solid #e0e0e0;
   background: white;
   color: #666;
@@ -1032,28 +1046,30 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .user-type-btn.active {
   border-color: #667eea;
   background: #667eea;
   color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .user-type-btn:hover:not(.active) {
   border-color: #667eea;
   color: #667eea;
+  transform: translateY(-1px);
 }
 
 /* Google Login Section */
 .google-login-section {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .google-login-btn {
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
   border: 2px solid #e0e0e0;
   background: white;
   color: #333;
@@ -1064,26 +1080,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  font-size: 0.85rem;
+  gap: 0.75rem;
+  font-size: 0.9rem;
 }
 
 .google-login-btn:hover {
   border-color: #4285F4;
-  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.2);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
+  transform: translateY(-2px);
 }
 
 .google-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 /* Divider */
 .divider {
   position: relative;
   text-align: center;
-  margin: 0.75rem 0;
+  margin: 1rem 0;
 }
 
 .divider::before {
@@ -1098,66 +1114,79 @@ body {
 
 .divider span {
   background: white;
-  padding: 0 0.6rem;
+  padding: 0 0.75rem;
   color: #666;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
 .login-form, .register-form {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
 }
 
 .form-group label {
   font-weight: 600;
   color: #333;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .form-group input {
-  padding: 0.5rem;
+  padding: 0.75rem;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 0.85rem;
-  transition: border-color 0.3s ease;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  background: #fafafa;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input::placeholder {
+  color: #999;
 }
 
 .submit-btn {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
-  padding: 0.7rem;
+  padding: 0.875rem;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 0.4rem;
+  margin-top: 0.5rem;
 }
 
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
 }
 
 .modal-footer {
-  margin-top: 0.75rem;
+  margin-top: 1rem;
   text-align: center;
   color: #666;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
 }
 
 .switch-link {
@@ -1169,9 +1198,11 @@ body {
   cursor: pointer;
   padding: 0;
   font-size: inherit;
+  transition: color 0.3s ease;
 }
 
 .switch-link:hover {
+  color: #5a67d8;
   text-decoration: underline;
 }
 
@@ -1212,7 +1243,7 @@ body {
   }
 
   .login-btn, .register-btn {
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
     font-size: 0.9rem;
   }
 
@@ -1221,26 +1252,25 @@ body {
   }
 
   .quiz-illustration {
-    width: 250px;
-    height: 250px;
+    display: none;
   }
 
   .question-mark {
-    font-size: 3rem;
+    display: none;
   }
 
   .user-type-buttons {
-    flex-direction: column;
+    gap: 0.4rem;
   }
 
   .google-login-btn {
-    padding: 0.75rem;
-    font-size: 0.9rem;
+    padding: 0.7rem 0.8rem;
+    font-size: 0.85rem;
   }
 
   .google-icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .page-container {
@@ -1250,7 +1280,7 @@ body {
   .page-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
   
   .page-header h2 {
@@ -1258,7 +1288,7 @@ body {
   }
   
   .page-content {
-    padding: 1rem;
+    padding: 1.5rem;
   }
   
   .form-actions {
@@ -1272,7 +1302,6 @@ body {
   
   .option-input {
     flex-direction: column;
-    align-items: flex-start;
     gap: 0.5rem;
   }
   
@@ -1294,6 +1323,101 @@ body {
   .teacher-actions button {
     width: 100%;
   }
+
+  /* Mobile Modal Improvements */
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .modal {
+    max-width: 100%;
+    margin: 0;
+    padding: 1.25rem;
+    border-radius: 12px;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .close-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1.1rem;
+  }
+
+  .user-type-selector {
+    margin-bottom: 0.75rem;
+  }
+
+  .user-type-selector label {
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .user-type-btn {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .google-login-section {
+    margin-bottom: 0.75rem;
+  }
+
+  .google-login-btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    gap: 0.6rem;
+  }
+
+  .google-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .divider {
+    margin: 0.75rem 0;
+  }
+
+  .divider span {
+    font-size: 0.75rem;
+    padding: 0 0.6rem;
+  }
+
+  .login-form, .register-form {
+    gap: 0.75rem;
+  }
+
+  .form-group {
+    gap: 0.3rem;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .form-group input {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .submit-btn {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+  }
+
+  .modal-footer {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    padding-top: 0.5rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1312,8 +1436,9 @@ body {
   }
 
   .modal {
-    margin: 1rem;
-    padding: 1.5rem;
+    margin: 0.5rem;
+    padding: 1rem;
+    border-radius: 10px;
   }
 
   .auth-buttons {
@@ -1322,8 +1447,8 @@ body {
   }
 
   .google-login-btn {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.85rem;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.8rem;
   }
 
   .page-container {
@@ -1331,7 +1456,7 @@ body {
   }
   
   .page-content {
-    padding: 0.75rem;
+    padding: 1rem;
   }
   
   .quiz-form .form-group input,
@@ -1358,6 +1483,98 @@ body {
   
   .hero-logo-image {
     height: 60px;
+  }
+
+  /* Extra Small Screen Modal Improvements */
+  .modal-overlay {
+    padding: 0.25rem;
+  }
+
+  .modal {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .modal-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .close-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 1rem;
+  }
+
+  .user-type-selector {
+    margin-bottom: 0.6rem;
+  }
+
+  .user-type-selector label {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .user-type-btn {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .google-login-section {
+    margin-bottom: 0.6rem;
+  }
+
+  .google-login-btn {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .google-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .divider {
+    margin: 0.6rem 0;
+  }
+
+  .divider span {
+    font-size: 0.7rem;
+    padding: 0 0.5rem;
+  }
+
+  .login-form, .register-form {
+    gap: 0.6rem;
+  }
+
+  .form-group {
+    gap: 0.25rem;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+  }
+
+  .form-group input {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .submit-btn {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+  }
+
+  .modal-footer {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    padding-top: 0.4rem;
   }
 }
 

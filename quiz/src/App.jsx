@@ -1353,7 +1353,7 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowLogin(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Login to QuizMaster</h2>
+login ans register               <h2 style={{color: 'white'}}>Login to QuizMaster</h2>
               <button 
                 className="close-btn"
                 onClick={() => setShowLogin(false)}
@@ -1432,7 +1432,7 @@ function App() {
               </button>
             </form>
             <div className="modal-footer">
-              <p>Don't have an account? <button onClick={switchToRegister} className="switch-link">Sign up</button></p>
+              <p><span style={{color: 'white'}} >Don't have an account? </span> <button onClick={switchToRegister} className="switch-link">Sign up</button></p>
             </div>
           </div>
         </div>
@@ -1443,7 +1443,7 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowRegister(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Register for QuizMaster</h2>
+              <h2 style={{color: 'white'}}>Register for QuizMaster</h2>
               <button 
                 className="close-btn"
                 onClick={() => setShowRegister(false)}
@@ -1546,7 +1546,7 @@ function App() {
               </button>
             </form>
             <div className="modal-footer">
-              <p>Already have an account? <button onClick={switchToLogin} className="switch-link">Login</button></p>
+              <p><span style={{color: 'white'}} >Already have an account? </span> <button onClick={switchToLogin} className="switch-link">Login</button></p>
             </div>
           </div>
         </div>
