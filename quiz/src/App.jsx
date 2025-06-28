@@ -167,6 +167,8 @@ function App() {
 
   const goToResults = () => {
     setCurrentPage('results')
+    // Refresh quiz results when accessing the results page
+    fetchQuizResults()
   }
 
   const goToEditQuiz = (quiz) => {
@@ -254,6 +256,9 @@ function App() {
       const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref))
       await Promise.all(deletePromises)
       
+      // Also remove from local state immediately
+      setQuizResults(prev => prev.filter(result => result.quizId !== quizId))
+      
       console.log(`Deleted ${querySnapshot.docs.length} results for quiz ${quizId}`)
     } catch (error) {
       console.error('Failed to delete quiz results:', error)
@@ -269,9 +274,28 @@ function App() {
         
         // Then delete the quiz
         await deleteDoc(doc(db, 'quizzes', quizId))
+        
+        // Remove from local quiz data immediately
+        setQuizData(prev => prev.filter(quiz => quiz.id !== quizId))
+        
+        // Clear any current quiz session if it's for this quiz
+        if (currentQuizSession.quizId === quizId) {
+          resetQuizSession()
+        }
+        
+        // Clear current quiz if it's the one being deleted
+        if (currentQuiz && currentQuiz.id === quizId) {
+          setCurrentQuiz(null)
+        }
+        
         alert('Quiz and all its results deleted!')
+        
+        // Refresh data to ensure everything is updated
         fetchQuizzes()
+        fetchQuizResults()
+        
       } catch (error) {
+        console.error('Failed to delete quiz:', error)
         alert('Failed to delete quiz: ' + error.message)
       }
     }
@@ -314,7 +338,31 @@ function App() {
       }
       const querySnapshot = await getDocs(q)
       const results = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      setQuizResults(results)
+      
+      // Clean up orphaned results (results for quizzes that no longer exist)
+      if (!quizId && quizData.length > 0) {
+        const validQuizIds = quizData.map(quiz => quiz.id)
+        const orphanedResults = results.filter(result => !validQuizIds.includes(result.quizId))
+        
+        if (orphanedResults.length > 0) {
+          console.log(`Found ${orphanedResults.length} orphaned results, cleaning up...`)
+          // Delete orphaned results from Firestore
+          const deletePromises = orphanedResults.map(result => 
+            deleteDoc(doc(db, 'quizResults', result.id))
+          )
+          await Promise.all(deletePromises)
+          
+          // Remove orphaned results from the results array
+          const cleanResults = results.filter(result => validQuizIds.includes(result.quizId))
+          setQuizResults(cleanResults)
+          console.log('Cleaned up orphaned results:', cleanResults)
+        } else {
+          setQuizResults(results)
+        }
+      } else {
+        setQuizResults(results)
+      }
+      
     } catch (error) {
       alert('Failed to fetch results: ' + error.message)
     }
@@ -414,7 +462,21 @@ function App() {
     )
   }
 
+  // Validate if a quiz still exists in the quiz data
+  const isQuizValid = (quizId) => {
+    return quizData.some(quiz => quiz.id === quizId)
+  }
+
   const startQuiz = (quiz) => {
+    // Check if the quiz still exists
+    if (!isQuizValid(quiz.id)) {
+      alert('This quiz is no longer available.')
+      // Refresh data to ensure we have the latest state
+      fetchQuizzes()
+      fetchQuizResults()
+      return
+    }
+    
     // Check if student has already taken this quiz
     if (userType === 'student' && hasStudentTakenQuiz(quiz.id)) {
       alert('You have already taken this quiz. You can only take each quiz once.')
@@ -552,6 +614,13 @@ function App() {
       fetchQuizResults()
     }
   }, [userType, isLoggedIn, user])
+
+  // Debug effect to log quiz results changes
+  useEffect(() => {
+    if (quizResults.length > 0) {
+      console.log('Quiz results updated:', quizResults)
+    }
+  }, [quizResults])
 
   return (
     <div className="app">
@@ -1033,12 +1102,6 @@ function App() {
                                 <span className="stat-number">{quizResults.length}</span>
                                 <span className="stat-label">Total Attempts</span>
                               </div>
-                              <div className="stat-item">
-                                <span className="stat-number">
-                                  {quizResults.length > 0 ? Math.round(quizResults.reduce((sum, r) => sum + r.percentage, 0) / quizResults.length) : 0}%
-                                </span>
-                                <span className="stat-label">Average Score</span>
-                              </div>
                             </div>
                           </div>
                         </div>
@@ -1046,8 +1109,6 @@ function App() {
                         <div className="quiz-results-grid">
                           {quizData.map(quiz => {
                             const quizResultsForQuiz = quizResults.filter(r => r.quizId === quiz.id)
-                            const averageScore = quizResultsForQuiz.length > 0 ? 
-                              Math.round(quizResultsForQuiz.reduce((sum, r) => sum + r.percentage, 0) / quizResultsForQuiz.length) : 0
                             const highestScore = quizResultsForQuiz.length > 0 ? Math.max(...quizResultsForQuiz.map(r => r.percentage)) : 0
                             const lowestScore = quizResultsForQuiz.length > 0 ? Math.min(...quizResultsForQuiz.map(r => r.percentage)) : 0
                             
@@ -1063,10 +1124,6 @@ function App() {
                                 {quizResultsForQuiz.length > 0 ? (
                                   <>
                                     <div className="quiz-stats-grid">
-                                      <div className="stat-card">
-                                        <div className="stat-value">{averageScore}%</div>
-                                        <div className="stat-label">Average</div>
-                                      </div>
                                       <div className="stat-card">
                                         <div className="stat-value">{highestScore}%</div>
                                         <div className="stat-label">Highest</div>
@@ -1117,13 +1174,6 @@ function App() {
                             <div className="summary-stat">
                               <span className="stat-number">{quizResults.filter(r => r.userId === user?.uid).length}</span>
                               <span className="stat-label">Quizzes Taken</span>
-                            </div>
-                            <div className="summary-stat">
-                              <span className="stat-number">
-                                {quizResults.filter(r => r.userId === user?.uid).length > 0 ? 
-                                  Math.round(quizResults.filter(r => r.userId === user?.uid).reduce((sum, r) => sum + r.percentage, 0) / quizResults.filter(r => r.userId === user?.uid).length) : 0}%
-                              </span>
-                              <span className="stat-label">Average Score</span>
                             </div>
                           </div>
                         </div>
@@ -1262,7 +1312,6 @@ function App() {
                         <p>Total Attempts: {quizResultsForQuiz.length}</p>
                         {quizResultsForQuiz.length > 0 && (
                           <div className="result-stats">
-                            <p>Average Score: {Math.round(quizResultsForQuiz.reduce((sum, r) => sum + r.percentage, 0) / quizResultsForQuiz.length)}%</p>
                             <p>Highest Score: {Math.max(...quizResultsForQuiz.map(r => r.percentage))}%</p>
                             <p>Lowest Score: {Math.min(...quizResultsForQuiz.map(r => r.percentage))}%</p>
                           </div>
