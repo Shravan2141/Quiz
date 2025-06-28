@@ -1,4 +1,142 @@
-# Firestore Database Setup Guide
+# Firebase Setup Guide for QuizMaster
+
+## 🔥 **Firebase Configuration**
+
+### **1. Firebase Project Setup**
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project or select existing project
+3. Enable the following services:
+
+### **2. Authentication Setup**
+1. **Go to Authentication → Sign-in method**
+2. **Enable Google Sign-in:**
+   - Click on "Google"
+   - Toggle "Enable" to ON
+   - Add your authorized domain (e.g., `localhost` for development)
+   - Click "Save"
+3. **Enable Email/Password Sign-in:**
+   - Click on "Email/Password"
+   - Toggle "Enable" to ON
+   - Toggle "Email link (passwordless sign-in)" to OFF (we're using traditional email/password)
+   - Click "Save"
+
+### **3. Firestore Database Setup**
+1. **Go to Firestore Database**
+2. **Create database** (if not already created)
+3. **Start in test mode** (for development)
+4. **Set up security rules** (see below)
+
+### **4. Security Rules**
+Add these rules to your Firestore Database → Rules:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow users to read all quizzes
+    match /quizzes/{quizId} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+                   (request.auth.uid == resource.data.createdBy || 
+                    !('createdBy' in resource.data));
+    }
+    
+    // Allow users to read/write their own quiz results
+    match /quizResults/{resultId} {
+      allow read, write: if request.auth != null && 
+                        (request.auth.uid == resource.data.userId || 
+                         !('userId' in resource.data));
+    }
+    
+    // Allow users to read/write their own user data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && 
+                        request.auth.uid == userId;
+    }
+  }
+}
+```
+
+### **5. Environment Variables**
+Make sure your `firebase.js` file has the correct configuration:
+
+```javascript
+const firebaseConfig = {
+  apiKey: "your-api-key",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "your-sender-id",
+  appId: "your-app-id"
+};
+```
+
+## 🚀 **Deployment Setup**
+
+### **For Netlify:**
+- **Build command:** `npm run build`
+- **Publish directory:** `quiz/dist`
+- **Add authorized domain:** `your-site.netlify.app`
+
+### **For Vercel:**
+- **Framework preset:** Vite
+- **Root directory:** `quiz`
+- **Build command:** `npm run build`
+- **Output directory:** `dist`
+- **Add authorized domain:** `your-site.vercel.app`
+
+## ✅ **Testing Authentication**
+
+1. **Google Authentication:**
+   - Click "Login" or "Register" in the app
+   - Select user type (Student/Teacher)
+   - Click "Continue with Google"
+   - Complete Google sign-in process
+
+2. **Email/Password Authentication:**
+   - Click "Register" to create a new account
+   - Fill in your details and select user type
+   - Click "Register as [UserType]"
+   - Or click "Login" to sign in with existing credentials
+
+## 🔧 **Troubleshooting**
+
+### **Common Issues:**
+
+1. **"Permission denied" errors:**
+   - Check Firestore security rules
+   - Ensure user is authenticated
+
+2. **Google sign-in not working:**
+   - Check if Google auth is enabled in Firebase
+   - Verify authorized domains include your deployment URL
+   - Ensure popup blockers are disabled
+
+3. **Email/password sign-in not working:**
+   - Check if Email/Password auth is enabled in Firebase
+   - Verify email format is valid
+   - Ensure password meets minimum requirements (6+ characters)
+
+4. **"Invalid domain" errors:**
+   - Add your domain to authorized domains in Firebase Console
+   - For development, add `localhost`
+   - For production, add your deployed domain
+
+### **Development vs Production:**
+- **Development:** Use `localhost` in authorized domains
+- **Production:** Add your deployed domain to authorized domains
+
+## 📱 **Features Available**
+
+✅ **Google OAuth Authentication**  
+✅ **Email/Password Authentication**  
+✅ **Role-based Access (Student/Teacher)**  
+✅ **Persistent Sessions**  
+✅ **Secure Firestore Access**  
+✅ **Quiz Creation & Management**  
+✅ **Quiz Taking & Results Tracking**  
+✅ **Responsive Design**  
+✅ **Loading States & Error Handling**
 
 ## Step 1: Enable Firestore Database
 
