@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow users to read their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Quiz rules
+    match /quizzes/{quizId} {
+      // Anyone can read active quizzes
+      allow read: if resource.data.isActive != false;
+      
+      // Only authenticated users can create quizzes
+      allow create: if request.auth != null;
+      
+      // Only the creator can update or delete their quizzes
+      allow update, delete: if request.auth != null && 
+        request.auth.uid == resource.data.createdBy;
+    }
+    
+    // Quiz results rules
+    match /quizResults/{resultId} {
+      // Users can read their own results
+      allow read: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      
+      // Users can create their own results
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+      
+      // Users can update their own results
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+    }
+    
+    // Test collection (for debugging)
+    match /test/{docId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+} 
