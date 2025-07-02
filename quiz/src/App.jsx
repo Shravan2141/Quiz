@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import { auth, provider, db } from './firebase'
-import { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, setDoc, serverTimestamp } from 'firebase/firestore'
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from 'firebase/firestore'
 import { GoogleAuthProvider } from 'firebase/auth'
 import logo from './assets/logo.png'
 
@@ -12,7 +12,6 @@ function App() {
   const [showRegister, setShowRegister] = useState(false)
   const [userType, setUserType] = useState('student')
   const [isLoading, setIsLoading] = useState(true)
-  const [isAuthLoading, setIsAuthLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState('dashboard') // 'dashboard', 'create-quiz', 'edit-quiz', 'results'
   const [loginForm, setLoginForm] = useState({
     email: '',
@@ -26,7 +25,6 @@ function App() {
     userType: 'student'
   })
   const [user, setUser] = useState(null)
-  const [userDisplayName, setUserDisplayName] = useState('')
   const [quizData, setQuizData] = useState([])
   const [showAddQuiz, setShowAddQuiz] = useState(false)
   const [showEditQuiz, setShowEditQuiz] = useState(false)
@@ -50,114 +48,44 @@ function App() {
     totalQuestions: 0
   })
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault()
-    setIsAuthLoading(true)
-    
-    try {
-      const result = await signInWithEmailAndPassword(auth, loginForm.email, loginForm.password)
-      const user = result.user
-      
-      // Get user data from Firestore to check userType
-      const userDoc = await getDocs(query(collection(db, 'users'), where('uid', '==', user.uid)))
-      if (!userDoc.empty) {
-        const userData = userDoc.docs[0].data()
-        setUserType(userData.userType || 'student')
-        localStorage.setItem('userType', userData.userType || 'student')
-      }
-      
-      console.log('Email login successful:', user)
-      setShowLogin(false)
-    } catch (error) {
-      console.error('Email login failed:', error)
-      let errorMessage = 'Login failed: '
-      if (error.code === 'auth/user-not-found') {
-        errorMessage += 'No account found with this email address.'
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage += 'Incorrect password.'
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage += 'Invalid email address.'
-      } else {
-        errorMessage += error.message
-      }
-      alert(errorMessage)
-    } finally {
-      setIsAuthLoading(false)
-    }
+    // Here you would typically make an API call to authenticate
+    console.log('Login attempt:', { ...loginForm, userType })
+    // For now, just close the modal - implement actual authentication later
+    setShowLogin(false)
   }
 
-  const handleRegister = async (e) => {
+  const handleRegister = (e) => {
     e.preventDefault()
     if (registerForm.password !== registerForm.confirmPassword) {
       alert('Passwords do not match!')
       return
     }
-    
-    if (registerForm.password.length < 6) {
-      alert('Password must be at least 6 characters long!')
-      return
-    }
-    
-    setIsAuthLoading(true)
-    
-    try {
-      const result = await createUserWithEmailAndPassword(auth, registerForm.email, registerForm.password)
-      const user = result.user
-      
-      // Store user data in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        displayName: registerForm.name,
-        userType: registerForm.userType,
-        createdAt: serverTimestamp()
-      })
-      
-      setUserType(registerForm.userType)
-      localStorage.setItem('userType', registerForm.userType)
-      
-      console.log('Email registration successful:', user)
-      setShowRegister(false)
-    } catch (error) {
-      console.error('Email registration failed:', error)
-      let errorMessage = 'Registration failed: '
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage += 'An account with this email already exists.'
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage += 'Invalid email address.'
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage += 'Password is too weak.'
-      } else {
-        errorMessage += error.message
-      }
-      alert(errorMessage)
-    } finally {
-      setIsAuthLoading(false)
-    }
+    // Here you would typically make an API call to register
+    console.log('Register attempt:', registerForm)
+    // For now, just close the modal - implement actual authentication later
+    setShowRegister(false)
   }
 
   const handleGoogleLogin = async (userType) => {
-    setIsAuthLoading(true)
     try {
       const provider = new GoogleAuthProvider()
       const result = await signInWithPopup(auth, provider)
-      const user = result.user
       
-      // Store user data in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        userType: userType,
-        createdAt: serverTimestamp()
-      }, { merge: true })
+      // Save userType to localStorage for session persistence
+      localStorage.setItem('userType', userType)
+      setUserType(userType)
       
-      console.log('Google login successful:', user)
+      // Close modals
+      setShowLogin(false)
+      setShowRegister(false)
+      
+      // The auth state listener will handle setting the user and fetching data
+      
     } catch (error) {
       console.error('Google login failed:', error)
       alert('Google login failed: ' + error.message)
-    } finally {
-      setIsAuthLoading(false)
     }
   }
 
@@ -165,16 +93,24 @@ function App() {
     try {
       await signOut(auth)
       // The auth state listener will handle clearing the user and login state
+      setLoginForm({ email: '', password: '' })
+      setRegisterForm({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        userType: 'student'
+      })
       // Reset quiz-related state
       setShowAddQuiz(false)
       setShowEditQuiz(false)
       setShowQuizResults(false)
       setCurrentQuiz(null)
       setQuizForm({ title: '', description: '', questions: [] })
-      setQuizData([])
-      setCurrentPage('dashboard')
+      setCurrentQuestion({ question: '', options: ['', '', '', ''], correctAnswer: 0 })
+      setCurrentQuizSession({ quizId: null, answers: [], score: 0, totalQuestions: 0 })
     } catch (error) {
-      console.error('Logout failed:', error)
+      alert('Logout failed: ' + error.message)
     }
   }
 
@@ -202,14 +138,14 @@ function App() {
     setShowLogin(false)
   }
 
-  const switchToLogin = () => {
-    setShowRegister(false)
-    setShowLogin(true)
-  }
-
   const switchToRegister = () => {
     setShowLogin(false)
     setShowRegister(true)
+  }
+
+  const switchToLogin = () => {
+    setShowRegister(false)
+    setShowLogin(true)
   }
 
   // Page navigation functions
@@ -634,7 +570,7 @@ function App() {
 
   // Auth state listener to maintain login persistence
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user)
         setIsLoggedIn(true)
@@ -649,20 +585,6 @@ function App() {
           localStorage.setItem('userType', 'student')
         }
         
-        // Fetch user data from Firestore to get display name
-        try {
-          const userDoc = await getDocs(query(collection(db, 'users'), where('uid', '==', user.uid)))
-          if (!userDoc.empty) {
-            const userData = userDoc.docs[0].data()
-            setUserDisplayName(userData.displayName || user.displayName || 'User')
-          } else {
-            setUserDisplayName(user.displayName || 'User')
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error)
-          setUserDisplayName(user.displayName || 'User')
-        }
-        
         // Fetch quizzes and results when user is authenticated
         // Add a small delay to ensure state is properly set
         setTimeout(() => {
@@ -671,7 +593,6 @@ function App() {
         }, 100)
       } else {
         setUser(null)
-        setUserDisplayName('')
         setIsLoggedIn(false)
         setUserType('student') // Reset to default
         // Clear quiz data when user logs out
@@ -728,7 +649,7 @@ function App() {
               </div>
             ) : !isLoading && isLoggedIn ? (
               <div className="user-section">
-                <span className="welcome-text">Welcome back, {userDisplayName || user.displayName || 'User'}!</span>
+                <span className="welcome-text">Welcome back, {user.displayName}!</span>
                 <button 
                   className="logout-btn"
                   onClick={handleLogout}
@@ -783,7 +704,7 @@ function App() {
             {currentPage === 'dashboard' && (
               <div className="dashboard">
                 <div className="page-header">
-                  <h2>Welcome to QuizMaster, {userDisplayName || user.displayName || 'User'}!</h2>
+                  <h2>Welcome to QuizMaster, {user.displayName}!</h2>
                 </div>
                 
                 {userType === 'teacher' ? (
