@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import { auth, provider, db } from './firebase'
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from 'firebase/firestore'
+import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc, query, where } from 'firebase/firestore'
 import { GoogleAuthProvider } from 'firebase/auth'
 import logo from './assets/logo.png'
 import { ToastContainer, toast } from 'react-toastify';
@@ -54,24 +54,50 @@ function App() {
   const [joinQuizError, setJoinQuizError] = useState('')
   const [showProfileCard, setShowProfileCard] = useState(false)
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
-    // Here you would typically make an API call to authenticate
-    console.log('Login attempt:', { ...loginForm, userType })
-    // For now, just close the modal - implement actual authentication later
-    setShowLogin(false)
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, loginForm.email, loginForm.password)
+      // Fetch userType from Firestore
+      const userDocRef = doc(db, 'users', userCredential.user.uid)
+      const userDoc = await getDoc(userDocRef)
+      if (userDoc.exists()) {
+        const fetchedType = userDoc.data().userType
+        setUserType(fetchedType)
+        localStorage.setItem('userType', fetchedType)
+      } else {
+        setUserType('student')
+        localStorage.setItem('userType', 'student')
+      }
+      setShowLogin(false)
+      toast.success('Login successful!')
+    } catch (error) {
+      toast.error('Login failed: ' + error.message)
+    }
   }
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault()
     if (registerForm.password !== registerForm.confirmPassword) {
-      alert('Passwords do not match!')
+      toast.error('Passwords do not match!')
       return
     }
-    // Here you would typically make an API call to register
-    console.log('Register attempt:', registerForm)
-    // For now, just close the modal - implement actual authentication later
-    setShowRegister(false)
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, registerForm.email, registerForm.password)
+      await updateProfile(userCredential.user, { displayName: registerForm.name })
+      // Save userType to Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        userType: registerForm.userType,
+        name: registerForm.name,
+        email: registerForm.email
+      })
+      setUserType(registerForm.userType)
+      localStorage.setItem('userType', registerForm.userType)
+      setShowRegister(false)
+      toast.success('Registration successful!')
+    } catch (error) {
+      toast.error('Registration failed: ' + error.message)
+    }
   }
 
   const handleGoogleLogin = async (userType) => {
@@ -352,10 +378,22 @@ function App() {
       const querySnapshot = await getDocs(q)
       const results = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       
+      // Filter results based on user type
+      let filteredResults = results
+      if (userType === 'teacher' && user?.uid) {
+        // Teachers see results for quizzes they created
+        const teacherQuizzes = quizData.filter(quiz => quiz.createdBy === user.uid)
+        const teacherQuizIds = teacherQuizzes.map(quiz => quiz.id)
+        filteredResults = results.filter(result => teacherQuizIds.includes(result.quizId))
+      } else if (userType === 'student' && user?.uid) {
+        // Students see only their own results
+        filteredResults = results.filter(result => result.userId === user.uid)
+      }
+      
       // Clean up orphaned results (results for quizzes that no longer exist)
       if (!quizId && quizData.length > 0) {
         const validQuizIds = quizData.map(quiz => quiz.id)
-        const orphanedResults = results.filter(result => !validQuizIds.includes(result.quizId))
+        const orphanedResults = filteredResults.filter(result => !validQuizIds.includes(result.quizId))
         
         if (orphanedResults.length > 0) {
           console.log(`Found ${orphanedResults.length} orphaned results, cleaning up...`)
@@ -366,14 +404,14 @@ function App() {
           await Promise.all(deletePromises)
           
           // Remove orphaned results from the results array
-          const cleanResults = results.filter(result => validQuizIds.includes(result.quizId))
+          const cleanResults = filteredResults.filter(result => validQuizIds.includes(result.quizId))
           setQuizResults(cleanResults)
           console.log('Cleaned up orphaned results:', cleanResults)
         } else {
-          setQuizResults(results)
+          setQuizResults(filteredResults)
         }
       } else {
-        setQuizResults(results)
+        setQuizResults(filteredResults)
       }
       
     } catch (error) {
@@ -1101,7 +1139,7 @@ function App() {
                             <h3>📊 Overall Statistics</h3>
                             <div className="summary-stats">
                               <div className="stat-item">
-                                <span className="stat-number">{quizData.length}</span>
+                                <span className="stat-number">{quizData.filter(quiz => quiz.createdBy === user?.uid).length}</span>
                                 <span className="stat-label">Total Quizzes</span>
                               </div>
                               <div className="stat-item">
@@ -1113,7 +1151,7 @@ function App() {
                         </div>
                         
                         <div className="quiz-results-grid">
-                          {quizData.map(quiz => {
+                          {quizData.filter(quiz => quiz.createdBy === user?.uid).map(quiz => {
                             const quizResultsForQuiz = quizResults.filter(r => r.quizId === quiz.id)
                             const highestScore = quizResultsForQuiz.length > 0 ? Math.max(...quizResultsForQuiz.map(r => r.percentage)) : 0
                             const lowestScore = quizResultsForQuiz.length > 0 ? Math.min(...quizResultsForQuiz.map(r => r.percentage)) : 0
