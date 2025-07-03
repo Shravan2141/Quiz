@@ -5,6 +5,8 @@ import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from 'firebase/firestore'
 import { GoogleAuthProvider } from 'firebase/auth'
 import logo from './assets/logo.png'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -47,6 +49,10 @@ function App() {
     score: 0,
     totalQuestions: 0
   })
+  const [showJoinQuizModal, setShowJoinQuizModal] = useState(false)
+  const [joinQuizCode, setJoinQuizCode] = useState('')
+  const [joinQuizError, setJoinQuizError] = useState('')
+  const [showProfileCard, setShowProfileCard] = useState(false)
 
   const handleLogin = (e) => {
     e.preventDefault()
@@ -110,8 +116,10 @@ function App() {
       setCurrentQuestion({ question: '', options: ['', '', '', ''], correctAnswer: 0 })
       setCurrentQuizSession({ quizId: null, answers: [], score: 0, totalQuestions: 0 })
     } catch (error) {
-      alert('Logout failed: ' + error.message)
+      // alert('Logout failed: ' + error.message)
+      toast.error('Logout failed: ' + error.message)
     }
+    window.location.reload();
   }
 
   const handleInputChange = (e, formType) => {
@@ -182,40 +190,39 @@ function App() {
     })
   }
 
+  // Helper to generate unique code
+  const generateQuizCode = () => {
+    return Math.random().toString(36).substr(2, 6).toUpperCase()
+  }
+
   // Firestore: Add a quiz
   const addQuiz = async (quiz) => {
     try {
       if (!user?.uid) {
         throw new Error('User not authenticated')
       }
-      
+      const quizCode = generateQuizCode()
       const quizData = {
         ...quiz,
+        code: quizCode,
         createdBy: user.uid,
         createdAt: new Date(),
         isActive: true,
         userType: userType // Store the user type for reference
       }
-      
       const docRef = await addDoc(collection(db, 'quizzes'), quizData)
-      
-      // Add the new quiz to the local state
       const newQuiz = {
         id: docRef.id,
         ...quizData
       }
       setQuizData(prevQuizzes => [...prevQuizzes, newQuiz])
-      
-      // Reset form and go back to dashboard
       setQuizForm({ title: '', description: '', questions: [] })
       setCurrentQuestion({ question: '', options: ['', '', '', ''], correctAnswer: 0 })
       goToDashboard()
-      
-      alert('Quiz created successfully!')
-      
+      toast.success(`Quiz created! Code: ${quizCode}`)
     } catch (error) {
-      console.error('Failed to add quiz:', error)
-      
+      // console.error('Failed to add quiz:', error)
+      toast.error('Failed to create quiz: ' + error.message)
       let errorMessage = 'Failed to create quiz: '
       if (error.code === 'permission-denied') {
         errorMessage += 'Permission denied. Please check your authentication.'
@@ -224,8 +231,7 @@ function App() {
       } else {
         errorMessage += error.message
       }
-      
-      alert(errorMessage)
+         toast.error(errorMessage)
     }
   }
 
@@ -237,13 +243,16 @@ function App() {
         ...updatedQuiz,
         updatedAt: new Date()
       })
-      alert('Quiz updated successfully!')
+      // alert('Quiz updated successfully!')
+      toast.success('Quiz updated successfully!')
       goToDashboard()
       setCurrentQuiz(null)
       fetchQuizzes()
     } catch (error) {
-      console.error('Failed to update quiz:', error)
-      alert('Failed to update quiz: ' + error.message)
+      // console.error('Failed to update quiz:', error)
+      toast.error('Failed to update quiz: ' + error);
+      // alert('Failed to update quiz: ' + error.message)
+      toast.error('Failed to update quiz: ' + error.message)
     }
   }
 
@@ -268,7 +277,7 @@ function App() {
   }
 
   const deleteQuiz = async (quizId) => {
-    if (window.confirm('Are you sure you want to delete this quiz? This will also delete all results for this quiz.')) {
+    if (true) { 
       try {
         // First delete all results for this quiz
         await deleteQuizResults(quizId)
@@ -289,7 +298,8 @@ function App() {
           setCurrentQuiz(null)
         }
         
-        alert('Quiz and all its results deleted!')
+        // alert('Quiz and all its results deleted!')
+        toast.success('Quiz Deleted Successfully!')
         
         // Refresh data to ensure everything is updated
         fetchQuizzes()
@@ -297,7 +307,8 @@ function App() {
         
       } catch (error) {
         console.error('Failed to delete quiz:', error)
-        alert('Failed to delete quiz: ' + error.message)
+        // alert('Failed to delete quiz: ' + error.message)
+        toast.error('Failed to delete quiz: ' + error.message)
       }
     }
   }
@@ -325,7 +336,8 @@ function App() {
         errorMessage += error.message
       }
       
-      alert(errorMessage)
+      // alert(errorMessage)
+      toast.error(errorMessage)
       setQuizData([]) // Set empty array on error
     }
   }
@@ -365,7 +377,8 @@ function App() {
       }
       
     } catch (error) {
-      alert('Failed to fetch results: ' + error.message)
+      // alert('Failed to fetch results: ' + error.message)
+      toast.error('Failed to fetch results: ' + error.message)
     }
   }
 
@@ -387,11 +400,13 @@ function App() {
     e.preventDefault()
     
     if (!quizForm.title || !quizForm.description) {
-      alert('Please fill in all fields')
+      // alert('Please fill in all fields')
+      toast.error('Please fill in all fields')
       return
     }
     if (quizForm.questions.length === 0) {
-      alert('Please add at least one question')
+      // alert('Please add at least one question')
+      toast.error('Please add at least one question')
       return
     }
     
@@ -401,11 +416,13 @@ function App() {
   const handleEditQuiz = (e) => {
     e.preventDefault()
     if (!quizForm.title || !quizForm.description) {
-      alert('Please fill in all fields')
+      // alert('Please fill in all fields')
+      toast.error('Please fill in all fields')
       return
     }
     if (quizForm.questions.length === 0) {
-      alert('Please add at least one question')
+      // alert('Please add at least one question')
+      toast.error('Please add at least one question')
       return
     }
     updateQuiz(currentQuiz.id, quizForm)
@@ -420,7 +437,8 @@ function App() {
 
   const addQuestion = () => {
     if (!currentQuestion.question || currentQuestion.options.some(opt => !opt)) {
-      alert('Please fill in all question fields')
+      // alert('Please fill in all question fields')
+      toast.error('Please fill in all question fields')
       return
     }
     
@@ -471,19 +489,14 @@ function App() {
   const startQuiz = (quiz) => {
     // Check if the quiz still exists
     if (!isQuizValid(quiz.id)) {
-      alert('This quiz is no longer available.')
+      // alert('This quiz is no longer available.')
+      toast.error('This quiz is no longer available.')
       // Refresh data to ensure we have the latest state
       fetchQuizzes()
       fetchQuizResults()
       return
     }
-    
-    // Check if student has already taken this quiz
-    if (userType === 'student' && hasStudentTakenQuiz(quiz.id)) {
-      alert('You have already taken this quiz. You can only take each quiz once.')
-      return
-    }
-    
+ 
     setCurrentQuizSession({
       quizId: quiz.id,
       answers: [],
@@ -649,13 +662,16 @@ function App() {
               </div>
             ) : !isLoading && isLoggedIn ? (
               <div className="user-section">
-                <span className="welcome-text">Welcome back, {user.displayName}!</span>
-                <button 
-                  className="logout-btn"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
+                <div className="profile-trigger" onClick={() => setShowProfileCard(v => !v)}>
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="Profile" className="profile-pic" />
+                  ) : (
+                    <div className="profile-pic default-profile">
+                      {user.displayName ? user.displayName[0].toUpperCase() : <span>👤</span>}
+                    </div>
+                  )}
+                  <div className="welcome-text">&nbsp;&nbsp;{user.displayName}</div>
+                </div>
               </div>
             ) : null}
           </nav>
@@ -685,9 +701,6 @@ function App() {
                 >
                   Get Started
                 </button>
-                {/* <button className="cta-secondary">
-                  Learn More
-                </button> */}
               </div>
             </div>
             <div className="hero-image">
@@ -732,7 +745,7 @@ function App() {
                             <p>{quiz.description}</p>
                             <div className="quiz-stats">
                               <span>Questions: {quiz.questions?.length || 0}</span>
-                              <span>Status: {quiz.isActive !== false ? 'Active' : 'Inactive'}</span>
+                              <span>Code: <b>{quiz.code}</b></span>
                             </div>
                             <div className="quiz-actions">
                               <button 
@@ -771,52 +784,48 @@ function App() {
                       >
                         📊 View My Results
                       </button>
+                      <button
+                        className="join-quiz-btn"
+                        onClick={() => setShowJoinQuizModal(true)}
+                      >
+                        🔑 Join Quiz
+                      </button>
                     </div>
-                    <div className="quiz-categories">
-                      {quizData.length > 0 ? (
-                        quizData.filter(quiz => quiz.isActive !== false).map((quiz) => {
-                          const hasTaken = hasStudentTakenQuiz(quiz.id)
-                          const studentResult = hasTaken ? quizResults.find(r => r.quizId === quiz.id && r.userId === user?.uid) : null
-                          
-                          return (
-                            <div key={quiz.id} className={`category-card ${hasTaken ? 'completed-quiz' : ''}`}>
-                              <h3>{quiz.title}</h3>
-                              <p>{quiz.description}</p>
-                              <div className="quiz-stats">
-                                <span>Questions: {quiz.questions?.length || 0}</span>
-                                {hasTaken && studentResult && (
-                                  <span className="completion-status">
-                                    ✅ Completed - Score: {studentResult.score}/{studentResult.totalQuestions} ({studentResult.percentage}%)
-                                  </span>
-                                )}
+                    {/* Attempted Quizzes Section */}
+                    <div className="attempted-quizzes">
+                      <h3>Attempted Quizzes</h3>
+                      {quizResults.filter(r => r.userId === user?.uid).length > 0 ? (
+                        <div className="quiz-categories">
+                          {quizResults.filter(r => r.userId === user?.uid).map((result, idx) => {
+                            const quiz = quizData.find(q => q.id === result.quizId);
+                            return (
+                              <div key={idx} className="category-card">
+                                <h3>{quiz?.title || result.quizTitle}</h3>
+                                <p>{quiz?.description || ''}</p>
+                                <div className="quiz-stats">
+                                  <span>Questions: {quiz?.questions?.length || result.totalQuestions || 0}</span>
+                                  <span>Code: <b>{quiz?.code || ''}</b></span>
+                                </div>
+                                <div className="quiz-attempt-details">
+                                  <span className={`score-badge ${result.percentage >= 80 ? 'excellent' : result.percentage >= 60 ? 'good' : 'needs-improvement'}`}>{result.percentage}%</span>
+                                  <span><strong>Score:</strong> {result.score}/{result.totalQuestions}</span>
+                                  <span><strong>Completed:</strong> {result.completedAt?.toDate?.()?.toLocaleDateString() || 'Recently'}</span>
+                                </div>
+                                <div className="performance-indicator">
+                                  {result.percentage >= 80 ? (
+                                    <span className="performance excellent">🌟 Excellent Performance!</span>
+                                  ) : result.percentage >= 60 ? (
+                                    <span className="performance good">👍 Good Work!</span>
+                                  ) : (
+                                    <span className="performance needs-improvement">💪 Keep Practicing!</span>
+                                  )}
+                                </div>
                               </div>
-                              {hasTaken ? (
-                                <button 
-                                  className="completed-quiz-btn"
-                                  disabled
-                                >
-                                  Quiz Completed
-                                </button>
-                              ) : (
-                                <button 
-                                  className="start-quiz-btn"
-                                  onClick={() => startQuiz(quiz)}
-                                >
-                                  Start Quiz
-                                </button>
-                              )}
-                            </div>
-                          )
-                        })
+                            );
+                          })}
+                        </div>
                       ) : (
-                        <div className="no-quizzes">
-                          <p>No quizzes available at the moment.</p>
-                        </div>
-                      )}
-                      {quizData.filter(quiz => quiz.isActive !== false).length === 0 && quizData.length > 0 && (
-                        <div className="no-quizzes">
-                          <p>No active quizzes available at the moment.</p>
-                        </div>
+                        <p>You haven't attempted any quizzes yet.</p>
                       )}
                     </div>
                   </div>
@@ -1551,6 +1560,88 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Join Quiz Modal for students */}
+      {showJoinQuizModal && (
+        <div className="modal-overlay" onClick={() => setShowJoinQuizModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 style={{color: 'white'}}  >Enter Quiz Code</h2>
+              <button className="close-btn" onClick={() => setShowJoinQuizModal(false)}>×</button>
+            </div>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              setJoinQuizError('')
+              // Find quiz by code
+              const q = query(collection(db, 'quizzes'), where('code', '==', joinQuizCode.toUpperCase()))
+              const snapshot = await getDocs(q)
+              if (snapshot.empty) {
+                setJoinQuizError('No quiz found with that code.')
+                return
+              }
+              const quizDoc = snapshot.docs[0]
+              const quiz = { id: quizDoc.id, ...quizDoc.data() }
+              if (quiz.isActive === false) {
+                setJoinQuizError('This quiz is not active.')
+                return
+              }
+              // Check if student has already taken this quiz
+              const hasTaken = quizResults.some(result => result.quizId === quiz.id && result.userId === user?.uid)
+              if (hasTaken) {
+                setShowJoinQuizModal(false)
+                setJoinQuizCode('')
+                toast.info('You have already taken this quiz. You can only take each quiz once.')
+                return
+              }
+              setShowJoinQuizModal(false)
+              setJoinQuizCode('')
+              setCurrentQuiz(quiz)
+              setCurrentQuizSession({
+                quizId: quiz.id,
+                answers: [],
+                score: 0,
+                totalQuestions: quiz.questions?.length || 0,
+                currentQuestionIndex: 0
+              })
+            }}>
+              <div className="form-group">
+                <label htmlFor="join-quiz-code">Quiz Code</label>
+                <input
+                  type="text"
+                  id="join-quiz-code"
+                  value={joinQuizCode}
+                  onChange={e => setJoinQuizCode(e.target.value)}
+                  required
+                  placeholder="Enter 6-character code"
+                  maxLength={6}
+                  style={{ textTransform: 'uppercase' }}
+                />
+              </div>
+              {joinQuizError && <div className="error-message">{joinQuizError}</div>}
+              <button type="submit" className="submit-btn">Join Quiz</button>
+            </form>
+          </div>
+        </div>
+      )}
+      {showProfileCard && (
+        <div className="profile-card-overlay" onClick={() => setShowProfileCard(false)}>
+          <div className="profile-card" onClick={e => e.stopPropagation()}>
+            {user.photoURL ? (
+              <img src={user.photoURL} alt="Profile" className="profile-pic large" />
+            ) : (
+              <div className="profile-pic default-profile large">
+                {user.displayName ? user.displayName[0].toUpperCase() : <span>👤</span>}
+              </div>
+            )}
+            <div className="profile-info">
+              <div className="profile-name">{user.displayName}</div>
+              <div className="profile-email">{user.email}</div>
+            </div>
+            <button className="logout-btn profile-logout" onClick={handleLogout}>Logout</button>
+          </div>
+        </div>
+      )}
+      <ToastContainer position="top-right" autoClose={1000} />
     </div>
   )
 }

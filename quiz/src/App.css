@@ -142,8 +142,15 @@ body {
 }
 
 .welcome-text {
-  color: #666;
+  background: linear-gradient(90deg, #929dd1, #544ebc, #783ac4, #8c14e2);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
   font-weight: 500;
+  font-size: 1.2rem;
+  animation: animated-gradient 6s ease-in-out infinite;
 }
 
 /* Main content */
@@ -2666,4 +2673,89 @@ a:hover, .switch-link:hover {
   50% {
     transform: translateY(-20px);
   }
+}
+
+.profile-pic {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 1rem;
+  border: 2px solid #a084e8;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.default-profile {
+  background: #a084e8;
+  color: #fff;
+}
+
+.profile-trigger {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.profile-card-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1000;
+  background: transparent;
+}
+.profile-card {
+  position: absolute;
+  top: 70px;
+  right: 32px;
+  background: #23272f;
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  padding: 2rem 2.5rem 1.5rem 2.5rem;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.2s;
+}
+.profile-pic.large {
+  width: 72px;
+  height: 72px;
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+}
+.profile-info {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.profile-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+.profile-email {
+  font-size: 0.95rem;
+  color: #bdbdbd;
+}
+.profile-logout {
+  margin-top: 0.5rem;
+  width: 100%;
+  background: #a084e8;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 0;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.profile-logout:hover {
+  background: #7c5fd3;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
