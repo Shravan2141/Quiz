@@ -799,19 +799,17 @@ function App() {
                           {quizResults.filter(r => r.userId === user?.uid).map((result, idx) => {
                             const quiz = quizData.find(q => q.id === result.quizId);
                             return (
-                              <div key={idx} className="category-card">
-                                <h3>{quiz?.title || result.quizTitle}</h3>
-                                <p>{quiz?.description || ''}</p>
-                                <div className="quiz-stats">
+                              <div key={idx} className="category-card attempted-quiz-card">
+                                <h3 style={{ marginBottom: '0.5rem' }}>{quiz?.title || result.quizTitle}</h3>
+                                <p style={{ marginBottom: '0.75rem', color: '#555' }}>{quiz?.description || ''}</p>
+                                <div className="quiz-stats" style={{ marginBottom: '0.75rem', display: 'flex', gap: '1.5rem' }}>
                                   <span>Questions: {quiz?.questions?.length || result.totalQuestions || 0}</span>
                                   <span>Code: <b>{quiz?.code || ''}</b></span>
                                 </div>
-                                <div className="quiz-attempt-details">
-                                  <span className={`score-badge ${result.percentage >= 80 ? 'excellent' : result.percentage >= 60 ? 'good' : 'needs-improvement'}`}>{result.percentage}%</span>
-                                  <span><strong>Score:</strong> {result.score}/{result.totalQuestions}</span>
+                                <div className="quiz-attempt-details" style={{ marginBottom: '0.75rem', display: 'flex', gap: '1.5rem' }}>
                                   <span><strong>Completed:</strong> {result.completedAt?.toDate?.()?.toLocaleDateString() || 'Recently'}</span>
                                 </div>
-                                <div className="performance-indicator">
+                                <div className="performance-indicator" style={{ marginTop: '0.5rem' }}>
                                   {result.percentage >= 80 ? (
                                     <span className="performance excellent">🌟 Excellent Performance!</span>
                                   ) : result.percentage >= 60 ? (
